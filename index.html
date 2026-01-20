@@ -47,19 +47,22 @@
             color: #0f172a;
             box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
         }
+        .toggle-active {
+            background-color: #f59e0b;
+            color: #0f172a;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4 lg:p-8">
 
-    <!-- Layout Wrapper -->
     <div class="flex flex-col lg:flex-row gap-6 items-stretch max-w-5xl w-full">
         
-        <!-- Main Chiclet Box (Tone Controls) -->
         <div class="flex-1 bg-slate-800 rounded-3xl p-6 shadow-2xl border border-slate-700">
             <header class="flex justify-between items-start mb-4">
                 <div>
                     <h1 class="text-xl font-bold text-amber-500">Horn Pitch Master</h1>
-                    <p class="text-slate-400 text-[10px] uppercase tracking-widest font-bold">Horn in F • Standard Transposition</p>
+                    <p class="text-slate-400 text-[10px] uppercase tracking-widest font-bold">Horn in F • Pro Reference</p>
                 </div>
                 <div class="text-right">
                     <div id="noteDisplay" class="text-3xl font-black text-white leading-none">C4</div>
@@ -67,8 +70,17 @@
                 </div>
             </header>
 
-            <div class="text-center mb-6 staff-bg rounded-2xl py-2 border border-slate-600 relative overflow-hidden shadow-inner">
-                <div id="staffDisplay" class="flex justify-center items-center h-28"></div>
+            <!-- Staff Display Area -->
+            <div class="text-center mb-6 staff-bg rounded-2xl py-4 border border-slate-600 relative overflow-hidden shadow-inner">
+                <div id="staffDisplay" class="flex justify-center items-center min-h-[400px]"></div>
+                
+                <!-- Bass Clef Mode Toggle -->
+                <div id="bassModeControls" class="absolute bottom-4 left-1/2 -translate-x-1/2 hidden">
+                    <div class="flex bg-slate-900/80 p-1 rounded-lg border border-slate-700 text-[9px] uppercase tracking-tighter">
+                        <button onclick="setBassMode('transposed')" id="btn-transposed" class="px-3 py-1 rounded-md toggle-active">Transposed F (Bass)</button>
+                        <button onclick="setBassMode('concert')" id="btn-concert" class="px-3 py-1 rounded-md ml-1">Concert Pitch (Bass)</button>
+                    </div>
+                </div>
             </div>
 
             <button id="toggleBtn" class="w-full py-6 rounded-2xl bg-amber-600 hover:bg-amber-500 transition-all font-bold text-xl mb-6 flex items-center justify-center gap-3 text-slate-900 shadow-lg active:scale-95 touch-none">
@@ -77,20 +89,20 @@
 
             <div class="space-y-2 mb-6">
                 <div class="grid grid-cols-7 gap-1">
-                    <button onclick="updateNote('C')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">C</button>
-                    <button onclick="updateNote('C#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">C#</button>
-                    <button onclick="updateNote('D')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">D</button>
-                    <button onclick="updateNote('D#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">D#</button>
-                    <button onclick="updateNote('E')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">E</button>
-                    <button onclick="updateNote('F')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">F</button>
-                    <button onclick="updateNote('F#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">F#</button>
+                    <button onclick="updateNote('C')" class="note-key bg-slate-700 py-3 rounded-lg text-sm">C</button>
+                    <button onclick="updateNote('C#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm">C#</button>
+                    <button onclick="updateNote('D')" class="note-key bg-slate-700 py-3 rounded-lg text-sm">D</button>
+                    <button onclick="updateNote('D#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm">D#</button>
+                    <button onclick="updateNote('E')" class="note-key bg-slate-700 py-3 rounded-lg text-sm">E</button>
+                    <button onclick="updateNote('F')" class="note-key bg-slate-700 py-3 rounded-lg text-sm">F</button>
+                    <button onclick="updateNote('F#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm">F#</button>
                 </div>
                 <div class="grid grid-cols-5 gap-1">
-                    <button onclick="updateNote('G')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">G</button>
-                    <button onclick="updateNote('G#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">G#</button>
-                    <button onclick="updateNote('A')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">A</button>
-                    <button onclick="updateNote('A#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">A#</button>
-                    <button onclick="updateNote('B')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">B</button>
+                    <button onclick="updateNote('G')" class="note-key bg-slate-700 py-3 rounded-lg text-sm">G</button>
+                    <button onclick="updateNote('G#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm">G#</button>
+                    <button onclick="updateNote('A')" class="note-key bg-slate-700 py-3 rounded-lg text-sm">A</button>
+                    <button onclick="updateNote('A#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm">A#</button>
+                    <button onclick="updateNote('B')" class="note-key bg-slate-700 py-3 rounded-lg text-sm">B</button>
                 </div>
             </div>
 
@@ -116,11 +128,9 @@
             </div>
         </div>
 
-        <!-- Fingering Panel (The Right Side) -->
+        <!-- Fingering Panel -->
         <div class="w-full lg:w-64 bg-slate-800/50 rounded-3xl p-6 border border-slate-700/50 backdrop-blur-sm flex flex-col justify-center">
             <h2 class="text-amber-500/50 text-xs font-bold uppercase tracking-widest text-center mb-6">Valve Fingerings</h2>
-            
-            <!-- F Side Fingerings -->
             <div class="mb-10 text-center">
                 <span class="text-[10px] text-slate-500 font-bold uppercase block mb-3">F Side</span>
                 <div class="flex justify-center gap-3">
@@ -130,8 +140,6 @@
                 </div>
                 <div id="f-text" class="text-xs text-slate-400 mt-2 font-mono">Open</div>
             </div>
-
-            <!-- Bb Side Fingerings -->
             <div class="text-center">
                 <span class="text-[10px] text-slate-500 font-bold uppercase block mb-3">Bb Side (Thumb)</span>
                 <div class="flex justify-center gap-3">
@@ -142,39 +150,26 @@
                 </div>
                 <div id="bb-text" class="text-xs text-slate-400 mt-2 font-mono">T-Open</div>
             </div>
-            
-            <p class="text-[9px] text-slate-600 mt-8 text-center leading-tight">Suggested standard fingerings based on harmonic series efficiency.</p>
         </div>
-
     </div>
 
     <script>
-        let audioCtx = null;
-        let oscillator = null;
-        let gainNode = null;
-        let filterNode = null;
-        let hornWave = null;
+        let audioCtx, oscillator, gainNode, filterNode, hornWave;
         let isPlaying = false;
-        
         let currentNote = "C";
         let currentOctave = 4;
+        let bassMode = 'transposed';
 
         const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-        const staffPositions = { "C": 0, "C#": 0, "D": 1, "D#": 1, "E": 2, "F": 3, "F#": 3, "G": 4, "G#": 4, "A": 5, "A#": 5, "B": 6 };
+        const trebleMap = { "C":-6, "C#":-6, "D":-5, "D#":-5, "E":-4, "F":-3, "F#":-3, "G":-2, "G#":-2, "A":-1, "A#":-1, "B":0 };
+        const bassMap = { "C":-1, "C#":-1, "D":0, "D#":0, "E":1, "F":2, "F#":2, "G":3, "G#":3, "A":4, "A#":4, "B":5 };
 
-        // Fingering Logic Map (Standard French Horn)
         const fingeringMap = {
-            "C2": { f: "13", bb: null }, "C#2": { f: "123", bb: null }, "D2": { f: "13", bb: null }, "D#2": { f: "23", bb: null }, "E2": { f: "12", bb: null }, "F2": { f: "1", bb: null }, "F#2": { f: "2", bb: null }, "G2": { f: "0", bb: null }, "G#2": { f: "23", bb: null }, "A2": { f: "12", bb: null }, "A#2": { f: "1", bb: null }, "B2": { f: "2", bb: null },
+            "C2": { f: "13", bb: null }, "C#2": { f: "123", bb: null }, "D2": { f: "12", bb: null }, "D#2": { f: "23", bb: null }, "E2": { f: "12", bb: null }, "F2": { f: "1", bb: null }, "F#2": { f: "2", bb: null }, "G2": { f: "0", bb: null }, "G#2": { f: "23", bb: null }, "A2": { f: "12", bb: null }, "A#2": { f: "1", bb: null }, "B2": { f: "2", bb: null },
             "C3": { f: "0", bb: null }, "C#3": { f: "123", bb: null }, "D3": { f: "13", bb: null }, "D#3": { f: "23", bb: null }, "E3": { f: "12", bb: null }, "F3": { f: "1", bb: "T12" }, "F#3": { f: "2", bb: "T23" }, "G3": { f: "0", bb: "T0" }, "G#3": { f: "23", bb: "T23" }, "A3": { f: "12", bb: "T12" }, "A#3": { f: "1", bb: "T1" }, "B3": { f: "2", bb: "T2" },
             "C4": { f: "0", bb: "T0" }, "C#4": { f: "12", bb: "T23" }, "D4": { f: "1", bb: "T12" }, "D#4": { f: "2", bb: "T1" }, "E4": { f: "0", bb: "T2" }, "F4": { f: "1", bb: "T0" }, "F#4": { f: "2", bb: "T2" }, "G4": { f: "0", bb: "T1" }, "G#4": { f: "23", bb: "T2" }, "A4": { f: "12", bb: "T0" }, "A#4": { f: "1", bb: "T1" }, "B4": { f: "2", bb: "T2" },
             "C5": { f: "0", bb: "T0" }, "C#5": { f: "12", bb: "T23" }, "D5": { f: "1", bb: "T12" }, "D#5": { f: "2", bb: "T1" }, "E5": { f: "0", bb: "T2" }, "F5": { f: "1", bb: "T0" }, "F#5": { f: "2", bb: "T2" }, "G5": { f: "0", bb: "T0" }, "G#5": { f: "23", bb: "T23" }, "A5": { f: "12", bb: "T12" }, "A#5": { f: "1", bb: "T1" }, "B5": { f: "2", bb: "T2" }
         };
-
-        function createHornWave(ctx) {
-            const real = new Float32Array([0, 1.0, 0.9, 0.7, 0.5, 0.3, 0.15, 0.08, 0.04, 0.02]);
-            const imag = new Float32Array(real.length).fill(0);
-            return ctx.createPeriodicWave(real, imag);
-        }
 
         function getFrequency(note, octave) {
             const noteIndex = notes.indexOf(note);
@@ -182,31 +177,149 @@
             return 440 * Math.pow(2, semitonesFromA4 / 12);
         }
 
-        function getConcertName(note, octave) {
+        function getConcertInfo(note, octave) {
             const index = notes.indexOf(note);
             const concertIndex = (index - 7 + 12) % 12;
             const shift = (index < 7) ? -1 : 0;
-            return notes[concertIndex] + (octave + shift);
+            return { name: notes[concertIndex], octave: octave + shift };
+        }
+
+        function setBassMode(mode) {
+            bassMode = mode;
+            document.getElementById('btn-transposed').className = `px-3 py-1 rounded-md ${mode === 'transposed' ? 'toggle-active' : ''}`;
+            document.getElementById('btn-concert').className = `px-3 py-1 rounded-md ml-1 ${mode === 'concert' ? 'toggle-active' : ''}`;
+            drawStaff();
+        }
+
+        function renderStaffGroup(svg, clefType, centerY, note, octave, mode) {
+            const step = 8;
+            let pos;
+            
+            if (clefType === 'treble') {
+                pos = trebleMap[note] + (octave - 4) * 7;
+            } else {
+                if (mode === 'transposed') {
+                    // Written pitch for Horn in F
+                    pos = bassMap[note] + (octave - 3) * 7;
+                } else {
+                    // Concert Pitch
+                    const concert = getConcertInfo(note, octave);
+                    pos = bassMap[concert.name] + (concert.octave - 3) * 7;
+                }
+            }
+
+            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            
+            // Staff Lines
+            for (let i = -2; i <= 2; i++) {
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", "10");
+                line.setAttribute("y1", centerY + i * (step * 2));
+                line.setAttribute("x2", "170");
+                line.setAttribute("y2", centerY + i * (step * 2));
+                line.setAttribute("stroke", "#475569");
+                line.setAttribute("stroke-width", "1");
+                g.appendChild(line);
+            }
+
+            // Clef Symbol
+            const clef = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            clef.setAttribute("x", "15");
+            clef.setAttribute("y", clefType === 'treble' ? centerY + 32 : centerY + 20);
+            clef.setAttribute("fill", "#94a3b8");
+            clef.setAttribute("font-size", "80");
+            clef.setAttribute("font-family", "serif");
+            clef.textContent = clefType === 'treble' ? "𝄞" : "𝄢";
+            g.appendChild(clef);
+
+            // Dynamic Ledger Lines
+            const noteY = centerY - pos * step;
+            const drawLedger = (p) => {
+                const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                l.setAttribute("x1", "70");
+                l.setAttribute("y1", centerY - p * step);
+                l.setAttribute("x2", "110");
+                l.setAttribute("y2", centerY - p * step);
+                l.setAttribute("stroke", "white");
+                l.setAttribute("stroke-width", "1.5");
+                g.appendChild(l);
+            };
+
+            // Calculate ledger lines: starting from outside the staff (-4 to 4 are staff positions)
+            if (pos >= 6) {
+                for (let i = 6; i <= pos; i += 2) drawLedger(i);
+            } else if (pos <= -6) {
+                for (let i = -6; i >= pos; i -= 2) drawLedger(i);
+            }
+
+            // Accidental
+            if (note.includes("#")) {
+                const acc = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                acc.setAttribute("x", "52");
+                acc.setAttribute("y", noteY + 10);
+                acc.setAttribute("fill", "#f59e0b");
+                acc.setAttribute("font-size", "32");
+                acc.textContent = "♯";
+                g.appendChild(acc);
+            }
+
+            // Note Head
+            const head = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+            head.setAttribute("cx", "90");
+            head.setAttribute("cy", noteY);
+            head.setAttribute("rx", "9");
+            head.setAttribute("ry", "7");
+            head.setAttribute("fill", "white");
+            head.setAttribute("transform", `rotate(-20, 90, ${noteY})`);
+            g.appendChild(head);
+
+            // Stem
+            const stem = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            const stemDirection = pos >= 0 ? 1 : -1;
+            const stemX = stemDirection === 1 ? 83 : 97;
+            stem.setAttribute("x1", stemX);
+            stem.setAttribute("y1", noteY);
+            stem.setAttribute("x2", stemX);
+            stem.setAttribute("y2", noteY + stemDirection * 50);
+            stem.setAttribute("stroke", "white");
+            stem.setAttribute("stroke-width", "2");
+            g.appendChild(stem);
+
+            return g;
+        }
+
+        function drawStaff() {
+            const container = document.getElementById('staffDisplay');
+            container.innerHTML = "";
+            const isLow = currentOctave < 4;
+            document.getElementById('bassModeControls').classList.toggle('hidden', !isLow);
+
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            const viewHeight = isLow ? 420 : 250;
+            svg.setAttribute("width", "180");
+            svg.setAttribute("height", viewHeight);
+            svg.setAttribute("viewBox", `0 0 180 ${viewHeight}`);
+
+            if (!isLow) {
+                svg.appendChild(renderStaffGroup(svg, 'treble', 125, currentNote, currentOctave));
+            } else {
+                // Grand Staff: Treble on top, Bass on bottom
+                svg.appendChild(renderStaffGroup(svg, 'treble', 100, currentNote, currentOctave));
+                svg.appendChild(renderStaffGroup(svg, 'bass', 280, currentNote, currentOctave, bassMode));
+            }
+            container.appendChild(svg);
         }
 
         function updateFingerings(note, octave) {
-            const key = note + octave;
-            const data = fingeringMap[key] || { f: "0", bb: "T0" };
-            
+            const data = fingeringMap[note + octave] || { f: "0", bb: "T0" };
             const setValves = (prefix, valStr) => {
-                const valves = ['1', '2', '3'];
-                valves.forEach(v => {
+                ['1', '2', '3'].forEach(v => {
                     const el = document.getElementById(`v-${prefix}-${v}`);
-                    if (valStr && valStr.includes(v)) el.classList.add('valve-pressed');
-                    else el.classList.remove('valve-pressed');
+                    el.classList.toggle('valve-pressed', valStr && valStr.includes(v));
                 });
-                
                 if (prefix === 'bb') {
-                    const t = document.getElementById('v-bb-t');
-                    if (valStr && valStr.includes('T')) t.classList.add('valve-pressed');
-                    else t.classList.remove('valve-pressed');
+                    document.getElementById('v-bb-t').classList.toggle('valve-pressed', valStr && valStr.includes('T'));
                 }
-
                 const textEl = document.getElementById(`${prefix}-text`);
                 if (!valStr) textEl.textContent = "N/A";
                 else {
@@ -215,61 +328,21 @@
                     textEl.textContent = readable;
                 }
             };
-
             setValves('f', data.f);
             setValves('bb', data.bb);
         }
 
-        function drawStaff() {
-            const container = document.getElementById('staffDisplay');
-            const basePos = staffPositions[currentNote];
-            const octaveOffset = (currentOctave - 4) * 7;
-            const pos = basePos + octaveOffset - 6; 
-            const stepHeight = 5.5;
-            const centerY = 56; 
-            const noteY = centerY - (pos * stepHeight);
-
-            let accidental = "";
-            if (currentNote.includes("#")) accidental = `<text x="54" y="${noteY + 7}" fill="#f59e0b" font-size="24" font-family="serif">♯</text>`;
-
-            let ledgerLines = "";
-            const drawLine = (p) => `<line x1="65" y1="${centerY - p * stepHeight}" x2="95" y2="${centerY - p * stepHeight}" stroke="white" stroke-width="1.2" />`;
-            if (pos <= -6) ledgerLines += drawLine(-6);
-            if (pos <= -8) ledgerLines += drawLine(-8);
-            if (pos <= -10) ledgerLines += drawLine(-10);
-            if (pos <= -12) ledgerLines += drawLine(-12);
-            if (pos >= 6) ledgerLines += drawLine(6);
-            if (pos >= 8) ledgerLines += drawLine(8);
-
-            const stemY = pos >= 1 ? noteY + 32 : noteY - 32;
-            const stemX = pos >= 1 ? 73.5 : 86.5;
-
-            container.innerHTML = `<svg width="160" height="110" viewBox="0 0 160 110" xmlns="http://www.w3.org/2000/svg">
-                <line x1="10" y1="34" x2="150" y2="34" stroke="#475569" stroke-width="1" />
-                <line x1="10" y1="45" x2="150" y2="45" stroke="#475569" stroke-width="1" />
-                <line x1="10" y1="56" x2="150" y2="56" stroke="#475569" stroke-width="1" />
-                <line x1="10" y1="67" x2="150" y2="67" stroke="#475569" stroke-width="1" />
-                <line x1="10" y1="78" x2="150" y2="78" stroke="#475569" stroke-width="1" />
-                <text x="12" y="80" fill="#94a3b8" font-size="55" font-family="serif">𝄞</text>
-                ${ledgerLines}${accidental}
-                <ellipse cx="80" cy="${noteY}" rx="6.5" ry="5" fill="white" transform="rotate(-20, 80, ${noteY})" />
-                <line x1="${stemX}" y1="${noteY}" x2="${stemX}" y2="${stemY}" stroke="white" stroke-width="1.2" />
-            </svg>`;
-        }
-
         function updateDisplay() {
             const freq = getFrequency(currentNote, currentOctave);
+            const concert = getConcertInfo(currentNote, currentOctave);
             document.getElementById('noteDisplay').textContent = currentNote + currentOctave;
-            document.getElementById('concertDisplay').textContent = `Sounds Concert ${getConcertName(currentNote, currentOctave)}`;
+            document.getElementById('concertDisplay').textContent = `Sounds Concert ${concert.name}${concert.octave}`;
             document.getElementById('freqDisplay').textContent = `${freq.toFixed(2)} Hz`;
             document.getElementById('labelDisplay').textContent = `${currentNote}${currentOctave} (Written)`;
-
             document.querySelectorAll('.note-key').forEach(btn => btn.classList.toggle('active-note', btn.textContent === currentNote));
             document.querySelectorAll('.oct-key').forEach(btn => btn.classList.toggle('active-octave', btn.textContent.includes(currentOctave)));
-
             drawStaff();
             updateFingerings(currentNote, currentOctave);
-
             if (oscillator && isPlaying) oscillator.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.05);
         }
 
@@ -295,24 +368,22 @@
                     filterNode.Q.value = 1.8;
                     filterNode.connect(gainNode);
                     gainNode.connect(audioCtx.destination);
-                    hornWave = createHornWave(audioCtx);
+                    const real = new Float32Array([0, 1.0, 0.9, 0.7, 0.5, 0.3, 0.15, 0.08, 0.04, 0.02]);
+                    const imag = new Float32Array(real.length).fill(0);
+                    hornWave = audioCtx.createPeriodicWave(real, imag);
                 }
                 if (audioCtx.state === 'suspended') audioCtx.resume();
-                const freq = getFrequency(currentNote, currentOctave);
                 oscillator = audioCtx.createOscillator();
                 oscillator.setPeriodicWave(hornWave);
-                oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                oscillator.frequency.setValueAtTime(getFrequency(currentNote, currentOctave), audioCtx.currentTime);
                 oscillator.connect(filterNode);
                 oscillator.start();
                 gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
                 gainNode.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + 0.1);
                 isPlaying = true;
             }
-            const toggleBtn = document.getElementById('toggleBtn');
-            const btnText = document.getElementById('btnText');
-            btnText.textContent = isPlaying ? "Stop Tone" : "Start Drone";
-            toggleBtn.classList.toggle('bg-amber-600', !isPlaying);
-            toggleBtn.classList.toggle('bg-red-600', isPlaying);
+            document.getElementById('btnText').textContent = isPlaying ? "Stop Tone" : "Start Drone";
+            document.getElementById('toggleBtn').className = `w-full py-6 rounded-2xl ${isPlaying ? 'bg-red-600 hover:bg-red-500' : 'bg-amber-600 hover:bg-amber-500'} transition-all font-bold text-xl mb-6 flex items-center justify-center gap-3 text-slate-900 shadow-lg active:scale-95 touch-none`;
         }
 
         document.getElementById('toggleBtn').addEventListener('click', toggleAudio);
