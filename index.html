@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horn Pitch Master Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f1f5f9;
+            font-family: system-ui, -apple-system, sans-serif;
+            touch-action: manipulation;
+            user-select: none;
+        }
+        .active-note {
+            background-color: #f59e0b !important;
+            color: #0f172a !important;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+        }
+        .active-octave {
+            border-color: #f59e0b !important;
+            color: #f59e0b !important;
+            background-color: rgba(245, 158, 11, 0.15);
+        }
+        input[type=range] {
+            accent-color: #f59e0b;
+        }
+        .staff-bg {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        }
+        .fingering-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #334155;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+        .valve-pressed {
+            background-color: #f59e0b;
+            border-color: #f59e0b;
+            color: #0f172a;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 lg:p-8">
+
+    <!-- Layout Wrapper -->
+    <div class="flex flex-col lg:flex-row gap-6 items-stretch max-w-5xl w-full">
+        
+        <!-- Main Chiclet Box (Tone Controls) -->
+        <div class="flex-1 bg-slate-800 rounded-3xl p-6 shadow-2xl border border-slate-700">
+            <header class="flex justify-between items-start mb-4">
+                <div>
+                    <h1 class="text-xl font-bold text-amber-500">Horn Pitch Master</h1>
+                    <p class="text-slate-400 text-[10px] uppercase tracking-widest font-bold">Horn in F • Standard Transposition</p>
+                </div>
+                <div class="text-right">
+                    <div id="noteDisplay" class="text-3xl font-black text-white leading-none">C4</div>
+                    <div id="concertDisplay" class="text-amber-500/80 text-[10px] font-mono mt-1">Sounds Concert F3</div>
+                </div>
+            </header>
+
+            <div class="text-center mb-6 staff-bg rounded-2xl py-2 border border-slate-600 relative overflow-hidden shadow-inner">
+                <div id="staffDisplay" class="flex justify-center items-center h-28"></div>
+            </div>
+
+            <button id="toggleBtn" class="w-full py-6 rounded-2xl bg-amber-600 hover:bg-amber-500 transition-all font-bold text-xl mb-6 flex items-center justify-center gap-3 text-slate-900 shadow-lg active:scale-95 touch-none">
+                <span id="btnText">Start Tone</span>
+            </button>
+
+            <div class="space-y-2 mb-6">
+                <div class="grid grid-cols-7 gap-1">
+                    <button onclick="updateNote('C')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">C</button>
+                    <button onclick="updateNote('C#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">C#</button>
+                    <button onclick="updateNote('D')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">D</button>
+                    <button onclick="updateNote('D#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">D#</button>
+                    <button onclick="updateNote('E')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">E</button>
+                    <button onclick="updateNote('F')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">F</button>
+                    <button onclick="updateNote('F#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">F#</button>
+                </div>
+                <div class="grid grid-cols-5 gap-1">
+                    <button onclick="updateNote('G')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">G</button>
+                    <button onclick="updateNote('G#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">G#</button>
+                    <button onclick="updateNote('A')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">A</button>
+                    <button onclick="updateNote('A#')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">A#</button>
+                    <button onclick="updateNote('B')" class="note-key bg-slate-700 py-3 rounded-lg text-sm border border-transparent">B</button>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mb-6">
+                <button onclick="updateOctave(2)" class="oct-key flex-1 border border-slate-600 py-2 rounded-xl text-[10px] uppercase">Low (2)</button>
+                <button onclick="updateOctave(3)" class="oct-key flex-1 border border-slate-600 py-2 rounded-xl text-[10px] uppercase">Mid (3)</button>
+                <button onclick="updateOctave(4)" class="oct-key flex-1 border border-slate-600 py-2 rounded-xl text-[10px] uppercase">High (4)</button>
+                <button onclick="updateOctave(5)" class="oct-key flex-1 border border-slate-600 py-2 rounded-xl text-[10px] uppercase">Alt (5)</button>
+            </div>
+
+            <div class="space-y-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-700">
+                <div class="flex flex-col gap-3">
+                    <div class="flex justify-between items-center px-1">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold">Timbre (Filter)</span>
+                        <span id="filterVal" class="text-[10px] font-mono text-amber-400">Warm Resonance</span>
+                    </div>
+                    <input type="range" id="filterSlider" min="150" max="2500" step="1" value="750" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                </div>
+                <div class="flex justify-between items-center px-1 border-t border-slate-800 pt-3">
+                    <span id="freqDisplay" class="text-[10px] font-mono text-slate-500 italic">174.61 Hz</span>
+                    <span id="labelDisplay" class="text-[10px] font-mono text-amber-500/50">C4 (Written)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fingering Panel (The Right Side) -->
+        <div class="w-full lg:w-64 bg-slate-800/50 rounded-3xl p-6 border border-slate-700/50 backdrop-blur-sm flex flex-col justify-center">
+            <h2 class="text-amber-500/50 text-xs font-bold uppercase tracking-widest text-center mb-6">Valve Fingerings</h2>
+            
+            <!-- F Side Fingerings -->
+            <div class="mb-10 text-center">
+                <span class="text-[10px] text-slate-500 font-bold uppercase block mb-3">F Side</span>
+                <div class="flex justify-center gap-3">
+                    <div id="v-f-1" class="fingering-circle">1</div>
+                    <div id="v-f-2" class="fingering-circle">2</div>
+                    <div id="v-f-3" class="fingering-circle">3</div>
+                </div>
+                <div id="f-text" class="text-xs text-slate-400 mt-2 font-mono">Open</div>
+            </div>
+
+            <!-- Bb Side Fingerings -->
+            <div class="text-center">
+                <span class="text-[10px] text-slate-500 font-bold uppercase block mb-3">Bb Side (Thumb)</span>
+                <div class="flex justify-center gap-3">
+                    <div id="v-bb-t" class="fingering-circle">T</div>
+                    <div id="v-bb-1" class="fingering-circle">1</div>
+                    <div id="v-bb-2" class="fingering-circle">2</div>
+                    <div id="v-bb-3" class="fingering-circle">3</div>
+                </div>
+                <div id="bb-text" class="text-xs text-slate-400 mt-2 font-mono">T-Open</div>
+            </div>
+            
+            <p class="text-[9px] text-slate-600 mt-8 text-center leading-tight">Suggested standard fingerings based on harmonic series efficiency.</p>
+        </div>
+
+    </div>
+
+    <script>
+        let audioCtx = null;
+        let oscillator = null;
+        let gainNode = null;
+        let filterNode = null;
+        let hornWave = null;
+        let isPlaying = false;
+        
+        let currentNote = "C";
+        let currentOctave = 4;
+
+        const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        const staffPositions = { "C": 0, "C#": 0, "D": 1, "D#": 1, "E": 2, "F": 3, "F#": 3, "G": 4, "G#": 4, "A": 5, "A#": 5, "B": 6 };
+
+        // Fingering Logic Map (Standard French Horn)
+        const fingeringMap = {
+            "C2": { f: "13", bb: null }, "C#2": { f: "123", bb: null }, "D2": { f: "13", bb: null }, "D#2": { f: "23", bb: null }, "E2": { f: "12", bb: null }, "F2": { f: "1", bb: null }, "F#2": { f: "2", bb: null }, "G2": { f: "0", bb: null }, "G#2": { f: "23", bb: null }, "A2": { f: "12", bb: null }, "A#2": { f: "1", bb: null }, "B2": { f: "2", bb: null },
+            "C3": { f: "0", bb: null }, "C#3": { f: "123", bb: null }, "D3": { f: "13", bb: null }, "D#3": { f: "23", bb: null }, "E3": { f: "12", bb: null }, "F3": { f: "1", bb: "T12" }, "F#3": { f: "2", bb: "T23" }, "G3": { f: "0", bb: "T0" }, "G#3": { f: "23", bb: "T23" }, "A3": { f: "12", bb: "T12" }, "A#3": { f: "1", bb: "T1" }, "B3": { f: "2", bb: "T2" },
+            "C4": { f: "0", bb: "T0" }, "C#4": { f: "12", bb: "T23" }, "D4": { f: "1", bb: "T12" }, "D#4": { f: "2", bb: "T1" }, "E4": { f: "0", bb: "T2" }, "F4": { f: "1", bb: "T0" }, "F#4": { f: "2", bb: "T2" }, "G4": { f: "0", bb: "T0" }, "G#4": { f: "23", bb: "T23" }, "A4": { f: "12", bb: "T12" }, "A#4": { f: "1", bb: "T1" }, "B4": { f: "2", bb: "T2" },
+            "C5": { f: "0", bb: "T0" }, "C#5": { f: "12", bb: "T23" }, "D5": { f: "1", bb: "T12" }, "D#5": { f: "2", bb: "T1" }, "E5": { f: "0", bb: "T2" }, "F5": { f: "1", bb: "T0" }, "F#5": { f: "2", bb: "T2" }, "G5": { f: "0", bb: "T0" }, "G#5": { f: "23", bb: "T23" }, "A5": { f: "12", bb: "T12" }, "A#5": { f: "1", bb: "T1" }, "B5": { f: "2", bb: "T2" }
+        };
+
+        function createHornWave(ctx) {
+            const real = new Float32Array([0, 1.0, 0.9, 0.7, 0.5, 0.3, 0.15, 0.08, 0.04, 0.02]);
+            const imag = new Float32Array(real.length).fill(0);
+            return ctx.createPeriodicWave(real, imag);
+        }
+
+        function getFrequency(note, octave) {
+            const noteIndex = notes.indexOf(note);
+            const semitonesFromA4 = (noteIndex - 9) + (octave - 4) * 12 - 7;
+            return 440 * Math.pow(2, semitonesFromA4 / 12);
+        }
+
+        function getConcertName(note, octave) {
+            const index = notes.indexOf(note);
+            const concertIndex = (index - 7 + 12) % 12;
+            const shift = (index < 7) ? -1 : 0;
+            return notes[concertIndex] + (octave + shift);
+        }
+
+        function updateFingerings(note, octave) {
+            const key = note + octave;
+            const data = fingeringMap[key] || { f: "0", bb: "T0" };
+            
+            const setValves = (prefix, valStr) => {
+                const valves = ['1', '2', '3'];
+                valves.forEach(v => {
+                    const el = document.getElementById(`v-${prefix}-${v}`);
+                    if (valStr && valStr.includes(v)) el.classList.add('valve-pressed');
+                    else el.classList.remove('valve-pressed');
+                });
+                
+                if (prefix === 'bb') {
+                    const t = document.getElementById('v-bb-t');
+                    if (valStr && valStr.includes('T')) t.classList.add('valve-pressed');
+                    else t.classList.remove('valve-pressed');
+                }
+
+                const textEl = document.getElementById(`${prefix}-text`);
+                if (!valStr) textEl.textContent = "N/A";
+                else {
+                    let readable = valStr.replace('T', 'T-').replace('0', 'Open');
+                    if (readable === 'T-') readable = 'T-Open';
+                    textEl.textContent = readable;
+                }
+            };
+
+            setValves('f', data.f);
+            setValves('bb', data.bb);
+        }
+
+        function drawStaff() {
+            const container = document.getElementById('staffDisplay');
+            const basePos = staffPositions[currentNote];
+            const octaveOffset = (currentOctave - 4) * 7;
+            const pos = basePos + octaveOffset - 6; 
+            const stepHeight = 5.5;
+            const centerY = 56; 
+            const noteY = centerY - (pos * stepHeight);
+
+            let accidental = "";
+            if (currentNote.includes("#")) accidental = `<text x="54" y="${noteY + 7}" fill="#f59e0b" font-size="24" font-family="serif">♯</text>`;
+
+            let ledgerLines = "";
+            const drawLine = (p) => `<line x1="65" y1="${centerY - p * stepHeight}" x2="95" y2="${centerY - p * stepHeight}" stroke="white" stroke-width="1.2" />`;
+            if (pos <= -6) ledgerLines += drawLine(-6);
+            if (pos <= -8) ledgerLines += drawLine(-8);
+            if (pos <= -10) ledgerLines += drawLine(-10);
+            if (pos <= -12) ledgerLines += drawLine(-12);
+            if (pos >= 6) ledgerLines += drawLine(6);
+            if (pos >= 8) ledgerLines += drawLine(8);
+
+            const stemY = pos >= 1 ? noteY + 32 : noteY - 32;
+            const stemX = pos >= 1 ? 73.5 : 86.5;
+
+            container.innerHTML = `<svg width="160" height="110" viewBox="0 0 160 110" xmlns="http://www.w3.org/2000/svg">
+                <line x1="10" y1="34" x2="150" y2="34" stroke="#475569" stroke-width="1" />
+                <line x1="10" y1="45" x2="150" y2="45" stroke="#475569" stroke-width="1" />
+                <line x1="10" y1="56" x2="150" y2="56" stroke="#475569" stroke-width="1" />
+                <line x1="10" y1="67" x2="150" y2="67" stroke="#475569" stroke-width="1" />
+                <line x1="10" y1="78" x2="150" y2="78" stroke="#475569" stroke-width="1" />
+                <text x="12" y="80" fill="#94a3b8" font-size="55" font-family="serif">𝄞</text>
+                ${ledgerLines}${accidental}
+                <ellipse cx="80" cy="${noteY}" rx="6.5" ry="5" fill="white" transform="rotate(-20, 80, ${noteY})" />
+                <line x1="${stemX}" y1="${noteY}" x2="${stemX}" y2="${stemY}" stroke="white" stroke-width="1.2" />
+            </svg>`;
+        }
+
+        function updateDisplay() {
+            const freq = getFrequency(currentNote, currentOctave);
+            document.getElementById('noteDisplay').textContent = currentNote + currentOctave;
+            document.getElementById('concertDisplay').textContent = `Sounds Concert ${getConcertName(currentNote, currentOctave)}`;
+            document.getElementById('freqDisplay').textContent = `${freq.toFixed(2)} Hz`;
+            document.getElementById('labelDisplay').textContent = `${currentNote}${currentOctave} (Written)`;
+
+            document.querySelectorAll('.note-key').forEach(btn => btn.classList.toggle('active-note', btn.textContent === currentNote));
+            document.querySelectorAll('.oct-key').forEach(btn => btn.classList.toggle('active-octave', btn.textContent.includes(currentOctave)));
+
+            drawStaff();
+            updateFingerings(currentNote, currentOctave);
+
+            if (oscillator && isPlaying) oscillator.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.05);
+        }
+
+        function updateNote(n) { currentNote = n; updateDisplay(); }
+        function updateOctave(o) { currentOctave = o; updateDisplay(); }
+
+        function toggleAudio() {
+            if (isPlaying) {
+                if (oscillator) {
+                    gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.08);
+                    const oldOsc = oscillator;
+                    setTimeout(() => { try { oldOsc.stop(); oldOsc.disconnect(); } catch(e){} }, 200);
+                    oscillator = null;
+                }
+                isPlaying = false;
+            } else {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    gainNode = audioCtx.createGain();
+                    filterNode = audioCtx.createBiquadFilter();
+                    filterNode.type = "lowpass";
+                    filterNode.frequency.value = document.getElementById('filterSlider').value;
+                    filterNode.Q.value = 1.8;
+                    filterNode.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    hornWave = createHornWave(audioCtx);
+                }
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const freq = getFrequency(currentNote, currentOctave);
+                oscillator = audioCtx.createOscillator();
+                oscillator.setPeriodicWave(hornWave);
+                oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                oscillator.connect(filterNode);
+                oscillator.start();
+                gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + 0.1);
+                isPlaying = true;
+            }
+            const toggleBtn = document.getElementById('toggleBtn');
+            const btnText = document.getElementById('btnText');
+            btnText.textContent = isPlaying ? "Stop Tone" : "Start Drone";
+            toggleBtn.classList.toggle('bg-amber-600', !isPlaying);
+            toggleBtn.classList.toggle('bg-red-600', isPlaying);
+        }
+
+        document.getElementById('toggleBtn').addEventListener('click', toggleAudio);
+        document.getElementById('filterSlider').addEventListener('input', (e) => {
+            const val = parseInt(e.target.value);
+            if (filterNode) filterNode.frequency.setTargetAtTime(val, audioCtx.currentTime, 0.1);
+            const label = document.getElementById('filterVal');
+            if (val < 500) label.textContent = "Dark / Muffled";
+            else if (val < 1000) label.textContent = "Warm Resonance";
+            else if (val < 1800) label.textContent = "Open / Brassy";
+            else label.textContent = "Stopped / Piercing";
+        });
+
+        window.onload = updateDisplay;
+        document.body.addEventListener('touchstart', () => { if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }, { once: true });
+    </script>
+</body>
+</html>
